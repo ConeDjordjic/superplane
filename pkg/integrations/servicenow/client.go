@@ -327,10 +327,14 @@ func (c *Client) ListCategories() ([]ChoiceRecord, error) {
 func (c *Client) ListSubcategories(category string) ([]ChoiceRecord, error) {
 	query := "name=incident^element=subcategory"
 	if category != "" {
-		query += "^dependent_value=" + url.QueryEscape(category)
+		query += "^dependent_value=" + category
 	}
 
-	path := fmt.Sprintf("/api/now/table/sys_choice?sysparm_query=%s&sysparm_fields=label,value&sysparm_limit=200", query)
+	params := url.Values{}
+	params.Set("sysparm_query", query)
+	params.Set("sysparm_fields", "label,value")
+	params.Set("sysparm_limit", "200")
+	path := "/api/now/table/sys_choice?" + params.Encode()
 	responseBody, err := c.execRequest(http.MethodGet, path, nil)
 	if err != nil {
 		return nil, err
