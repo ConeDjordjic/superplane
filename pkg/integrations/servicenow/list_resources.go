@@ -124,15 +124,6 @@ func (s *ServiceNow) ListResources(resourceType string, ctx core.ListResourcesCo
 			{Type: resourceType, ID: "3", Name: "Low"},
 		}, nil
 
-	case "priority":
-		return []core.IntegrationResource{
-			{Type: resourceType, ID: "1", Name: "Critical"},
-			{Type: resourceType, ID: "2", Name: "High"},
-			{Type: resourceType, ID: "3", Name: "Moderate"},
-			{Type: resourceType, ID: "4", Name: "Low"},
-			{Type: resourceType, ID: "5", Name: "Planning"},
-		}, nil
-
 	case "on_hold_reason":
 		return []core.IntegrationResource{
 			{Type: resourceType, ID: "1", Name: "Awaiting Caller"},
@@ -155,23 +146,27 @@ func (s *ServiceNow) ListResources(resourceType string, ctx core.ListResourcesCo
 			{Type: resourceType, ID: "User error", Name: "User error"},
 		}, nil
 
-	case "service":
+	case "incident":
 		client, err := NewClient(ctx.HTTP, ctx.Integration)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create client: %w", err)
 		}
 
-		services, err := client.ListServices()
+		incidents, err := client.ListIncidents(200)
 		if err != nil {
-			return nil, fmt.Errorf("failed to list services: %w", err)
+			return nil, fmt.Errorf("failed to list incidents: %w", err)
 		}
 
-		resources := make([]core.IntegrationResource, 0, len(services))
-		for _, svc := range services {
+		resources := make([]core.IntegrationResource, 0, len(incidents))
+		for _, incident := range incidents {
+			name := incident.Number
+			if incident.ShortDescription != "" {
+				name = fmt.Sprintf("%s - %s", incident.Number, incident.ShortDescription)
+			}
 			resources = append(resources, core.IntegrationResource{
 				Type: resourceType,
-				Name: svc.Name,
-				ID:   svc.SysID,
+				Name: name,
+				ID:   incident.SysID,
 			})
 		}
 

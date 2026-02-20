@@ -217,20 +217,6 @@ func Test__ServiceNow__ListResources(t *testing.T) {
 		assert.Equal(t, "impact", resources[0].Type)
 	})
 
-	t.Run("returns hardcoded priority resources", func(t *testing.T) {
-		resources, err := s.ListResources("priority", core.ListResourcesContext{
-			Integration: integrationCtx,
-		})
-
-		require.NoError(t, err)
-		assert.Len(t, resources, 5)
-		assert.Equal(t, "1", resources[0].ID)
-		assert.Equal(t, "Critical", resources[0].Name)
-		assert.Equal(t, "priority", resources[0].Type)
-		assert.Equal(t, "5", resources[4].ID)
-		assert.Equal(t, "Planning", resources[4].Name)
-	})
-
 	t.Run("returns hardcoded on_hold_reason resources", func(t *testing.T) {
 		resources, err := s.ListResources("on_hold_reason", core.ListResourcesContext{
 			Integration: integrationCtx,
@@ -253,35 +239,6 @@ func Test__ServiceNow__ListResources(t *testing.T) {
 		assert.Equal(t, "resolution_code", resources[0].Type)
 		assert.Equal(t, "Duplicate", resources[0].ID)
 		assert.Equal(t, "Duplicate", resources[0].Name)
-	})
-
-	t.Run("returns list of services", func(t *testing.T) {
-		ctx := core.ListResourcesContext{
-			Integration: integrationCtx,
-			HTTP: &contexts.HTTPContext{
-				Responses: []*http.Response{
-					{
-						StatusCode: http.StatusOK,
-						Body: io.NopCloser(strings.NewReader(`{
-							"result": [
-								{"sys_id": "svc1", "name": "Email Service"},
-								{"sys_id": "svc2", "name": "Web Portal"}
-							]
-						}`)),
-					},
-				},
-			},
-		}
-
-		resources, err := s.ListResources("service", ctx)
-
-		require.NoError(t, err)
-		assert.Len(t, resources, 2)
-		assert.Equal(t, "svc1", resources[0].ID)
-		assert.Equal(t, "Email Service", resources[0].Name)
-		assert.Equal(t, "service", resources[0].Type)
-		assert.Equal(t, "svc2", resources[1].ID)
-		assert.Equal(t, "Web Portal", resources[1].Name)
 	})
 
 	t.Run("returns list of subcategories for a category", func(t *testing.T) {
