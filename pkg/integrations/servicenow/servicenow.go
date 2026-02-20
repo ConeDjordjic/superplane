@@ -48,12 +48,25 @@ func (s *ServiceNow) Description() string {
 }
 
 func (s *ServiceNow) Instructions() string {
-	return `Requires a ServiceNow instance with OAuth API access. The following roles are needed on your ServiceNow instance:
+	return `Requires a ServiceNow instance with OAuth API access.
 
-**Integration account** (for OAuth):
-- **itil** — read/write access to the Incident table
+Before creating OAuth credentials, enable client credentials grant on your instance:
+- Go to **System Properties** (sys_properties_list.do) and search for:
+  - **Name**: glide.oauth.inbound.client.credential.grant_type.enabled
+  - (Important: the property name ends with **enabled**)
+- If it does not exist, create it with:
+  - **Application Scope**: Global
+  - **Type**: true | false
+  - **Value**: true
 
-Optionally, enable **Web Service Access Only** on the integration account to restrict it to API-only use.`
+Then configure OAuth:
+- Go to **System OAuth > Inbound Integrations**
+- Create a new integration with **OAuth - Client Credentials Grant**
+- Copy the generated **Client ID** and **Client Secret**
+- Assign required permissions to the integration account:
+  - **itil** role (required for incident read/write)
+  - Optionally **admin** if broader scoped access is needed
+- Optionally enable **Web Service Access Only** on the integration account to restrict it to API-only use.`
 }
 
 func (s *ServiceNow) Configuration() []configuration.Field {
